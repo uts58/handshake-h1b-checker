@@ -1,0 +1,37 @@
+{
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "manifest_version": 3,
+  "name": "bv2",
+  "description": "Find if a company sponsored H1B in the past couple of years in LinkedIn, Indeed, Google and glassdoor.",
+  "short_name": "UH1BSC",
+  "version": "0.21",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": "images/h1b_logo.png",
+    "default_popup": "popup.html",
+    "default_title": "The Extension automatically works when you are in Linkedin or indeed jobs search page."
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.joinhandshake.com/*"
+      ],
+      "run_at": "document_idle",
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "permissions": [],
+  "icons": {
+    "16": "images/h1b_logo_16x16.png",
+    "48": "images/h1b_logo_48x48.png",
+    "96": "images/h1b_logo_96x96.png",
+    "128": "images/h1b_logo_128x128.png"
+  }
+}
