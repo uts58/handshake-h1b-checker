@@ -20,15 +20,6 @@ chrome.runtime.onInstalled.addListener((details) => {
     // });
 });
 
-// Filter for LinkedIn URLs
-const filter = {
-    url: [
-        {
-            urlMatches: 'https://www.linkedin.com/',
-        },
-    ],
-};
-
 // Parse CSV data and update tab on tab update
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     console.log(changeInfo.status);
@@ -52,6 +43,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log(request.companyName);
     if (request.mode === 'single') {
         const results = findCompany(request.companyName);
         if (results.length == 0) return false;
@@ -59,7 +51,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.mode === 'search') {
         var searchResults = searchCompany(request.companyName);
         sendResponse(searchResults);
-
     } else {
         const found = findCompany(request.companyName).length > 0;
         sendResponse(found);

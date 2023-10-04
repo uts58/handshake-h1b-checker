@@ -49,19 +49,6 @@ setTimeout(function () {
     }
 }, 1000);
 
-function getCompanyName() {
-    try {
-        if (url.includes(HandShake)) {
-            let z1 = document.getElementsByClassName(HandShakeCompanyNamesCSS[0]);
-            if (z1.length > 0) {
-                companyName = z1[0].childNodes[0].textContent;
-            }
-        }
-    } catch (error) {
-        console.log(error)
-    }
-
-}
 
 function initiate() {
     if (document.location.href.includes(HandShake)) {
@@ -74,49 +61,67 @@ function process() {
     }
     removeOldElements();
     getCompanyName();
-    console.log(companyName);
     if (companyName === undefined || companyName === "" || companyName == null) {
-        console.log("Cannot Find Company Name")
-        return;
+        console.log("Cannot Find Company Name");
+    }
+}
+
+function getCompanyName() {
+    try {
+        if (url.includes(HandShake)) {
+            let z1 = document.getElementsByClassName(HandShakeCompanyNamesCSS[0]);
+            if (z1.length > 0) {
+                companyName = z1[0].childNodes[0].textContent;
+            }
+        }
+    } catch (error) {
+        console.log(error)
     }
 }
 
 function getCompanyNameListElement() {
-    let companyLi;
-    if (url.includes(HandShake)) {
-        for (const element of HandShakeCompanyNamesCSS) {
-            companyLi = document.getElementsByClassName(element)
-            if (companyLi.length > 0) {
-                break;
-            }
+    let companyDivs = document.getElementsByClassName(HandShakeCompanyNamesCSS[0]);
+    let companyLi = [];
+    for (let div of companyDivs) {
+        let span = div.querySelector('span:nth-child(1) > span');
+        if (span) {
+            companyLi.push(span);
         }
     }
     return companyLi;
 }
 
-function getDataForCompanies(companyLi = null) {
-    if (companyLi == null) {
-        companyLi = getCompanyNameListElement();
-    }
-    for (let i = 0; i < companyLi.length; i++) {
-        let name = companyLi[i].innerText.trim();
+function getDataForCompanies(companyLi = getCompanyNameListElement()) {
+
+    companyLi.forEach((element, index) => {
+
+        const companyName = element.textContent;
 
         chrome.runtime.sendMessage({
-            companyName: name, mode: "single"
-        }, function (response) {
-            try {
-                if (writeLog) console.log(response);
-                let badge = document.createElement("span");
-                badge.setAttribute("class", "h1bBadge");
-                if (response === true) {
-                    badge.setAttribute("sbadge", 'H1B Sponsor');
-                } else {
-                    badge.setAttribute("fbadge", 'Not a H1B Sponsor');
-                }
-                // console.log(name, badge);
-            } catch (e) {
-                console.log(e);
+            companyName: companyName,
+            mode: "list"
+        }, (response) => {
+
+            if (writeLog) console.log(response);
+
+            if (!element.parentElement.querySelector('.h1bBadge')) {
+
+                const badge = document.createElement("span");
+                badge.classList.add("h1bBadge");
+                const badgeType = response ? "sbadge" : "fbadge";
+                const badgeText = response ? 'H1B Sponsor' : 'Not H1B';
+
+                badge.setAttribute(badgeType, badgeText);
+
+                // Insert the badge just before the closing </span> tag
+                const elementHTML = element.outerHTML;
+                const updatedHTML = elementHTML.replace("</span>", ` ${badge.outerHTML}</span>`);
+
+                element.outerHTML = updatedHTML;
             }
-        })
-    }
+
+        });
+    });
 }
+
+
